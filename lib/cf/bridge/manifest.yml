@@ -3,14 +3,15 @@ applications:
   host: abacus-cf-bridge
   path: .cfpack/app.zip
   instances: 1
-  memory: 512M
+  memory: 6G
   disk_quota: 512M
   env:
     CONF: default
-    DEBUG: e-abacus-*
+    #DEBUG: abacus-cf*
+    #DEBUG: abacus-breaker
     COLLECTOR: abacus-usage-collector
-    COUCHDB: abacus-dbserver
+    #COUCHDB: http://username:password@ip:port
     EUREKA: abacus-eureka-stub
-    UAA: uaa
-    API: api
+    UAA: https://uaa.cloud.gov
+    API: https://api.cloud.gov
     NODE_MODULES_CACHE: false

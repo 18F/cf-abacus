@@ -3,9 +3,10 @@ applications:
   host: abacus-dbserver
   path: .cfpack/app.zip
   instances: 1
-  memory: 1G
-  disk_quota: 512M
+  memory: 2G
+  disk_quota: 2G
   env:
     CONF: default
-    DEBUG: e-abacus-*
+    #DEBUG: e-abacus-*
+    #DEBUG: abacus-breaker
     NODE_MODULES_CACHE: false

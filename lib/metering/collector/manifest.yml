@@ -3,14 +3,15 @@ applications:
   host: abacus-usage-collector
   path: .cfpack/app.zip
   instances: 1
-  memory: 512M
+  memory: 2G
   disk_quota: 512M
   env:
     CONF: default
-    DEBUG: e-abacus-*
+    #DEBUG: e-abacus-*
+    #DEBUG: abacus-breaker
     METER: abacus-usage-meter
     PROVISIONING: abacus-provisioning-stub
-    COUCHDB: abacus-dbserver
+    #COUCHDB: http://username:password@ip:port
     EUREKA: abacus-eureka-stub
     NODE_MODULES_CACHE: false
     SECURED: false
