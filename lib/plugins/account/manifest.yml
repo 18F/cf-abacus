@@ -7,8 +7,9 @@ applications:
   disk_quota: 512M
   env:
     CONF: default
-    DB: abacus-pouchserver
-    DEBUG: e-abacus-*
+    #DB: removed
+    DBCLIENT: abacus-couchclient
+    #DEBUG: e-abacus-*
     EUREKA: abacus-eureka-plugin
     NODE_MODULES_CACHE: false
     SECURED: false

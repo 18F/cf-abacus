@@ -3,26 +3,24 @@ applications:
   host: abacus-cf-bridge
   path: .cfpack/app.zip
   instances: 1
-  memory: 512M
+  memory: 4G
   disk_quota: 512M
   env:
     CONF: default
-    DEBUG: e-abacus-*
+    #DEBUG: e-abacus-*
     COLLECTOR: abacus-usage-collector
     EUREKA: abacus-eureka-plugin
-    API: api
-    DB: abacus-pouchserver
+    API: https://api.cloud.gov
+    #DB: removed
     DBCLIENT: abacus-couchclient
-    CF_CLIENT_ID: abacus-cf-bridge
-    CF_CLIENT_SECRET: secret
+    #CF_CLIENT_ID: removed
+    #CF_CLIENT_SECRET: removed
     NODE_MODULES_CACHE: false
     SECURED: false
     AUTH_SERVER: api
     CLIENT_ID: abacus-linux-container
     CLIENT_SECRET: secret
-    JWTKEY: |+
-      -----BEGIN PUBLIC KEY-----
-      ... <UAA public key in PEM format> ...
-      -----END PUBLIC KEY-----
+    #JWTKEY: removed
     JWTALGO: RS256
     THROTTLE: 2
+    UAA: https://uaa.cloud.gov

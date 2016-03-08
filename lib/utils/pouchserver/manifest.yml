@@ -7,5 +7,5 @@ applications:
   disk_quota: 512M
   env:
     CONF: default
-    DEBUG: e-abacus-*
+    #DEBUG: e-abacus-*
     NODE_MODULES_CACHE: false
