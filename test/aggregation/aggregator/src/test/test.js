@@ -84,7 +84,9 @@ const pruneWindows = (v, k) => {
     return nwin;
   }
   if(k === 'consumers')
-    return map(v, (c) => c.split('/')[0]);
+    return map(v, (c) => omit(c, 'processed', 'doc_id'));
+  if(k === 'resource_instances')
+    return map(v, (ri) => omit(ri, 'processed'));
   return v;
 };
 
@@ -383,7 +385,10 @@ describe('abacus-usage-aggregator-itest', () => {
       const consumers = () => u === 0 && ri <= 3 + s || tri <= 3 + s ? 1 : 2;
 
       // Create resource aggregations
-      return create(consumers, (i) => cid(o, i === 0 ? s : s === 0 ? 4 : 5));
+      return create(consumers, (i) => ({
+        consumer_id: cid(o, i === 0 ? s : s === 0 ? 4 : 5),
+        space_id: sid(o, s)
+      }));
     };
 
     // Resource plan level aggregations for a given space
@@ -461,6 +466,19 @@ describe('abacus-usage-aggregator-itest', () => {
       }));
     };
 
+    const riagg = (o, ri, u) => {
+      const instances = () => ri + 1;
+      return create(instances, (i) => {
+        const key = [oid(o), riid(o, i), cid(o, i), pid(i), mpid(i),
+          rpid(i), ppid(i)].join('/');
+        const time = map([end + u, end + u], (t) => seqid.pad16(t)).join('/');
+        return {
+          key: key,
+          id: dbclient.kturi(key, time)
+        };
+      });
+    };
+
     // Aggregated usage for a given org, resource instance, usage indices
     // TODO check the values of the accumulated usage
     const aggregatedTemplate = (o, ri, u) => ({
@@ -473,7 +491,8 @@ describe('abacus-usage-aggregator-itest', () => {
         aggregated_usage: a(ri, u, undefined, (n) => n + 1, false),
         plans: opagg(o, ri, u)
       }],
-      spaces: osagg(o, ri, u)
+      spaces: osagg(o, ri, u),
+      resource_instances: riagg(o, ri, u)
     });
 
     // Aggregated usage for a given consumer
@@ -515,9 +534,10 @@ describe('abacus-usage-aggregator-itest', () => {
             expect(err).to.equal(undefined);
             expect(val.statusCode).to.equal(200);
 
-            expect(omit(val.body, 'id', 'processed'))
+            expect(omit(val.body, 'id', 'processed', 'processed_id'))
               .to.deep.equal(omit(
-                accumulatedTemplate(o, ri, u), 'id', 'processed'));
+                accumulatedTemplate(o, ri, u),
+                'id', 'processed', 'processed_id'));
 
             debug('Verified accumulated usage for org%d instance%d usage%d',
               o + 1, ri + 1, u + 1);
@@ -553,7 +573,8 @@ describe('abacus-usage-aggregator-itest', () => {
         include_docs: true },
         (err, val) => {
           try {
-            expect(clone(omit(val.rows[0].doc, ['id', 'processed',
+            expect(clone(omit(val.rows[0].doc, ['id',
+              'processed', 'processed_id',
               '_id', '_rev', 'accumulated_usage_id', 'start']),
                 pruneWindows)).to.deep.equal(omit(expected, ['start']));
             done();
@@ -563,7 +584,8 @@ describe('abacus-usage-aggregator-itest', () => {
             // data within the giveup time, forward the exception
             if(Date.now() >= processingDeadline) {
               debug('Unable to properly verify the last record');
-              expect(clone(omit(val.rows[0].doc, ['id', 'processed',
+              expect(clone(omit(val.rows[0].doc, ['id',
+                'processed', 'processed_id',
                 '_id', '_rev', 'accumulated_usage_id', 'start']),
                   pruneWindows)).to.deep.equal(omit(expected, ['start']));
             }
@@ -593,7 +615,8 @@ describe('abacus-usage-aggregator-itest', () => {
         include_docs: true },
         (err, val) => {
           try {
-            expect(clone(omit(val.rows[0].doc, ['id', 'processed',
+            expect(clone(omit(val.rows[0].doc, ['id',
+              'processed', 'processed_id',
               '_id', '_rev', 'accumulated_usage_id', 'start']),
                 pruneWindows)).to.deep.equal(omit(expectedConsumer, ['start',
                   'organization_id', 'space_id']));
@@ -604,7 +627,8 @@ describe('abacus-usage-aggregator-itest', () => {
             // data within the giveup time, forward the exception
             if(Date.now() >= processingDeadline) {
               debug('Unable to properly verify the last record');
-              expect(clone(omit(val.rows[0].doc, ['id', 'processed',
+              expect(clone(omit(val.rows[0].doc,
+                ['id', 'processed', 'processed_id',
                 '_id', '_rev', 'accumulated_usage_id', 'start']),
                   pruneWindows)).to.deep.equal(omit(expectedConsumer, ['start',
                     'organization_id', 'space_id']));
