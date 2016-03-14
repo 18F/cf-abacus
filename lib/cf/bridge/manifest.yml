@@ -3,7 +3,7 @@ applications:
   host: abacus-cf-bridge
   path: .cfpack/app.zip
   instances: 1
-  memory: 4G
+  memory: 1G
   disk_quota: 512M
   env:
     CONF: default
